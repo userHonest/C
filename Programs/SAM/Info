@@ -1,4 +1,8 @@
+SAM (Student Assistant Manager)
 This program is a project i did for myself to store the hours i worked as a student assistant in Kristiania, Oslo.
 Its is written in C
-it is is connected with mysql server 8.0 and local host.
+it is is connected with mysql server 8.0 and local host. and programmed with MYSQL api C 
+
+this CRUD program has a menu to add,show,delete and count data. Hours and minutes.
+
 
