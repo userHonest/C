@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-//#include <stdbool.h>
 #include <mysql/mysql.h>
 #include <string.h>
 
@@ -14,10 +13,10 @@ void show() {
     	MYSQL_RES *res;
     	MYSQL_ROW row;
 
-    	char *server = "localhost";
-    	char *user = "userhonest";
-    	char *password = "skole_arbeider@_2023";
-    	char *database = "skoletimer";
+    	char *server = "add_server";
+    	char *user = "add_username";
+    	char *password = "add_password";
+    	char *database = "add database";
 
     	connect01 = mysql_init(NULL);
 
@@ -121,10 +120,10 @@ void add(){
 	MYSQL *connect01;
     	MYSQL_STMT *stmt;
 
-    	char *server = "localhost";
-    	char *user = "userhonest";
-    	char *password = "skole_arbeider@_2023";
-    	char *database = "skoletimer";
+    	char *server = "add server ";
+    	char *user = "add_user";
+    	char *password = "add_password";
+    	char *database = "add_database";
 	
 	connect01 = mysql_init(NULL);
 
@@ -213,14 +212,15 @@ void delete_data() {
 	MYSQL *connect01;
     	MYSQL_STMT *stmt;
 
-    	char *server = "localhost";
-    	char *user = "userhonest";
-    	char *password = "skole_arbeider@_2023";
-    	char *database = "skoletimer";
+	// variables
+    	char *server = "add_server";
+    	char *user = "add_user";
+    	char *password = "add_password";
+    	char *database = "add_database";
 	
 	connect01 = mysql_init(NULL);
 
-   
+   	// connection to database
     	if (!mysql_real_connect(connect01, server,
                             user, password, database, 0, NULL, 0)) {
         	fprintf(stderr, "%s\n", mysql_error(connect01));
@@ -230,7 +230,7 @@ void delete_data() {
 	
 	MYSQL_BIND data[1];
 	int id;
-	
+	// using prepraed statement stored in a integer named id that is passed on to memset and data
 	stmt = mysql_stmt_init(connect01);
 	mysql_stmt_prepare(stmt,"DELETE from workhours WHERE time_id=?",strlen ("DELETE from workhours WHERE time_id=?"));
 	
@@ -270,21 +270,21 @@ void show_count() {
     	MYSQL_RES *res;
     	MYSQL_ROW row;
 
-    	char *server = "localhost";
-    	char *user = "userhonest";
-    	char *password = "skole_arbeider@_2023";
-    	char *database = "skoletimer";
+    	char *server = "add_server";
+    	char *user = "add_user";
+    	char *password = "add_password";
+    	char *database = "add_database";
 
     	connect01 = mysql_init(NULL);
 
-   
+   // connection to database 
     	if (!mysql_real_connect(connect01, server,
                             user, password, database, 0, NULL, 0)) {
         	fprintf(stderr, "%s\n", mysql_error(connect01));
         	exit(1);
     	}
 
-	// query for mysql
+	// query for mysql as sum of all hours stored and sum of all minutes stored
 	char query[200] = "SELECT SUM(time) as Total_Hours, SUM(minutes) as Total_Extra_Minutes FROM workhours";
 
 	if (mysql_query(connect01, query)) {
