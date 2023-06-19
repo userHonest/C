@@ -1,0 +1,18 @@
+Both codes are part of a chat server application. The first code handles client connections, and the second code is the main server code. The server code handles multiple clients simultaneously by creating a separate thread for each connected client.
+
+Here is a brief explanation of each code:
+
+Client handler code (part 1):
+
+The ReceiveMessages function receives messages from the server and prints them to the client's console.
+The AdminHandler function processes server-side admin commands, such as shutting down the server or displaying available commands.
+The Broadcast function sends a message to all connected clients, except the sender.
+The ClientHandler function manages the client's connection, reading messages from the client and broadcasting them to other clients using the Broadcast function.
+Main server code (part 2):
+
+The main function initializes the server socket, binds it to an IP address and port, and starts listening for incoming connections.
+The server creates a separate thread (sAdminThread) for handling admin commands using the AdminHandler function.
+The server continuously accepts incoming client connections in a loop. For each new connection, it creates a client_t structure, adds it to the list of connected clients, and creates a new thread (mClientThread) for handling the client using the ClientHandler function.
+The functionality that allows the server to handle multiple clients simultaneously is the use of threads. For each connected client, the server creates a new thread and runs the ClientHandler function in that thread. This approach enables the server to manage multiple clients concurrently, as each client's communication is handled in a separate thread.
+
+In summary, the main server code listens for incoming connections, and the client handler code manages the connections, allowing for multiple clients to chat simultaneously. The use of threads in the server code is what enables the server to handle multiple clients at the same time.

@@ -1,0 +1,37 @@
+This code is for a simple chat client that connects to a server and exchanges messages with other clients. Here's a breakdown of the code:
+
+Import required headers and libraries.
+Define global variables, such as socket file descriptor iSock, server address structure stServAddr, message buffer chBuffr, and client's username chName.
+Define the main function, which does the following:
+a. Create a socket with the socket() function and store the file descriptor in iSock.
+b. Set the server's address family, port number, and IP address in the stServAddr structure.
+c. Attempt to connect to the server using the connect() function with the iSock file descriptor and stServAddr structure.
+d. If the connection is successful, send a connection message to the server and print a welcome message to the client.
+e. Read the server's response into the buffer chBuffr and print it to the console.
+f. Prompt the user to enter their username and store it in the chName variable.
+g. Create a new thread for receiving messages from the server using the pthread_create() function and the ReceiveMessages function (which is defined in a separate header file, client.h).
+h. Implement a loop to handle user input, messages, and commands. The loop continues until the user enters the \\q command:
+i. Prompt the user to enter a message or command.
+ii. If the user enters \\q, print an exit message and break the loop.
+iii. If the user enters \\man, print a list of available client commands.
+iv. If the user enters any other message or command, send it to the server, and print an "unknown command" message if it's not one of the recognized commands.
+i. Close the socket using the close() function and return 0 to indicate successful execution.
+This client code is designed to work with a chat server that listens for incoming connections, processes messages, and broadcasts them to all connected clients. The server code would be responsible for handling multiple clients and implementing the chat functionality.
+
+This code snippet defines a function called ReceiveMessages, which is used as a thread function to continuously receive messages from the server in a chat client. Here's a breakdown of the code:
+
+Define the ReceiveMessages function, which takes a pointer to a socket file descriptor as an argument (sock_ptr). This function returns a void pointer, as required by the pthread_create function when used for creating threads.
+
+Inside the ReceiveMessages function:
+a. Cast the sock_ptr argument to an integer and assign it to the local variable iSock. This variable represents the socket file descriptor connected to the server.
+b. Define a character buffer chBuffr with a size of 1024 bytes to store incoming messages from the server.
+c. Declare an integer variable iReadValue to store the return value of the read function.
+d. Implement an infinite loop that does the following:
+i. Clear the contents of the chBuffr buffer using the memset function.
+ii. Read data from the server using the read function with the socket file descriptor iSock and the buffer chBuffr. The return value of the read function is stored in the iReadValue variable.
+iii. If iReadValue is less than or equal to 0, it indicates that the connection to the server has been closed or an error has occurred. Print a message to inform the user that the connection has been closed by the server, and then break the loop.
+iv. If iReadValue is greater than 0, it means data was successfully read from the server. Print the received message to the console using the printf function.
+e. Once the loop is exited, close the socket using the close function and terminate the program with an exit status of 0.
+f. Return NULL as the function's result. Since this function is used as a thread function, it must return a void pointer.
+
+In summary, the ReceiveMessages function is designed to run in a separate thread in a chat client, constantly listening for and printing incoming messages from the server.
