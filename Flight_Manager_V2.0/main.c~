@@ -1,0 +1,677 @@
+//============================================== // 
+//  Retake_Exam PGR3401 C-Programming for Linux
+//  Teacher: Bengt Østby
+//  Menu Structure using enum is used as a 
+//  reference in last years exam solution.
+//  -----
+//  Task 3
+//  Version 1.1
+//  Sourcefile: main.c
+//  Author: Kandidate_nr: 2019
+//  Patch_Date: 05/08/2023
+//===============================================//
+
+// ======= c Libraries=======
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#include "selection.h"
+//=========================
+// defining, the menu in a enum
+///////////////////////////////////////////////////////////////////////////
+//  This menu structure was given to me in a class, the structure
+//  with a enum , had another program, for me it was a interesting   
+//  way of defining a menu structure, therfore i must recognize that
+// this structure has served as an inspiration to make my program
+//  author of the menu structure with enum is named in the description area.
+////////////////////////////////////////////////////////////////////////////
+
+// this enum is defining a set of options 
+// in my case there are options for the user to sekect with the keyboard.
+
+enum MENUSELECT{
+	
+	UNINITIALIZED = 0,
+	MENU_ADD_FLIGHT = 1, 
+	MENU_ADD_PASSENGER = 2,
+	MENU_RETRIEVE_FLIGHT_INFO = 3,
+	MENU_FIND_FLIGHT_TIME = 4,
+	MENU_DELETE_FLIGHT = 5,
+	MENU_DELETE_PASSENGER_DATA = 6,
+	MENU_CHANGE_SEAT = 7,
+	MENU_SEARCH_AVAILABLE_SEATS = 8,
+	MENU_PROMPT_DESTINATIONS = 9,
+	MENU_SEARCH_PASSENGER_BYNAME = 10,
+	
+	MENU_EXITCODE = 11
+
+
+};
+
+
+// ========== printscreen function
+
+
+enum MENUSELECT __getch();
+
+////// Main function ///////////
+
+int main(int iArgC, char *pszArgV){
+	
+	// menu at 0
+	enum MENUSELECT eMenuSelect = UNINITIALIZED;
+	
+	// LIST FOR PASSENGERS AND FLIGHTS 
+	Flight* flights = NULL;
+	Flight* flight;
+
+	do{
+	
+	// menu function in selection.c 
+		PrintScreen();
+		eMenuSelect = __getch();
+		// Here is the process menu
+		printf("\r\n= Intergalactic Flight Manager (%i)\n", eMenuSelect);
+
+/////////////////////////////////////////////////////////////////////////////
+//  Here starts the cases that are in each case assinged on the enum,
+//  there are in total 9 cases, 8 to handle the data added to the lists
+//  related to the topic given in the task, and one to exit the menu.
+//////////////////////////////////////////////////////////////////////////7
+
+    //  eMenuSelect starts at 0 in a loop.if user selects a number retunr that number // 
+		switch (eMenuSelect){
+   
+    ////////////////////////////////////////////////////////////////////////////////
+    // Theese are all the variables, they may appear global, but they are local
+    // as long they are inside the eMenuSelect switch , they will be called uppon
+    // if uses selects the option.			        
+	//////////////////////////////////////////////////////////////////////////////////		        
+	
+			        int iNewSeat;
+			        int iAge;
+			        int iSeatNumber;
+					int iSeats;
+					int iDepartureHour;
+					int iDepartureMinute;
+					
+					char szFlight_ID[10]; // one of the most important variable 
+					
+					char szSeats[16];
+					char szDepartureTime[10];
+			        char szDestination[50];
+			        char szName[50];
+			        char szSeatNumber[16];
+			        char szAge[10];
+			        char szDeleteConfirmation[4];
+			        char szSelectedFlight_ID[10];
+			        
+			
+		////////////////////////////////////////////////////////////////
+		// First calling on <AddFlight> function, the program
+		// promts the user to add data that will be stored on the list
+		/////////////////////////////////////////////////////////////////	        
+			// 1
+			case MENU_ADD_FLIGHT:	
+					
+					// fgets to add a flight ID
+					printf("Enter flight ID (e.g. FN-17): ");
+					fgets(szFlight_ID, sizeof(szFlight_ID), stdin);
+					szFlight_ID[strcspn(szFlight_ID, "\n")] = 0; // <- next line 
+					
+					// fgets to add destination 
+					printf("Enter destination: ");
+					fgets(szDestination, sizeof(szDestination), stdin);
+					szDestination[strcspn(szDestination, "\n")] = 0;
+					
+					// scanf to add the seat number, with %d to prevent Bufferoverflow.
+					printf("Enter the numbers of seats in the plane: ");
+					fgets(szSeats, sizeof(szSeats), stdin);
+					
+					if (sscanf(szSeats, "%d", &iSeats) != 1){
+					    printf("Invalid input for seats\n"); //<- check for valid input 
+					    continue;
+					
+					}
+					
+					// fgets to add hour in 00:00, other will not get stored
+					printf("Enter departure time (HH:MM): ");
+					fgets(szDepartureTime, sizeof(szDepartureTime), stdin);
+					
+					if (sscanf(szDepartureTime, "%d:%d", &iDepartureHour, &iDepartureMinute) != 2){
+					    printf("Invalid input for departure time\n");
+					    continue;
+					}
+					
+					// function // 
+					AddFlight(&flights, szFlight_ID, szDestination, iSeats, iDepartureHour, iDepartureMinute);
+				    
+				    printf("Flight added to system!\n");
+				    
+				    // calling the function that prints the results added
+				    ShowFlightData(flights);
+				    printf("\r\nPress <enter> to continue...");
+				    break;
+					
+					
+		//////////////////////////////////////////////////////////////////////////
+	    // This option is to add the passenger to a current flight, the user must
+	    // promt for flight id, if flight id is in the list, then the user may 
+	    // continue,asuming that the user as added a flight record first		 
+		//////////////////////////////////////////////////////////////////////////	      
+		    //2
+			case MENU_ADD_PASSENGER:
+			        
+			        // add flight id 
+			        printf("Enter flight ID (e.x. FN-17): "),
+			        fgets(szFlight_ID, sizeof(szFlight_ID), stdin);
+			        szFlight_ID[strcspn(szFlight_ID, "\n")] = 0;
+			        
+			        // adding seat number, if number is over the limit 
+			        // it will not work
+			        printf("Enter seat number: ");
+			        fgets (szSeatNumber, sizeof(szSeatNumber), stdin);
+			        if (sscanf(szSeatNumber, "%d", &iSeatNumber) != 1){
+			            printf("Invalid input for seat number\n");
+			            continue;
+			        }
+			        
+			        // adding name, can be surname ex: Cassian Andor 
+			        printf("Enter Passenger name (e.x Cassian Andor): ");
+			        fgets (szName, sizeof(szName), stdin);
+			        szName[strcspn(szName, "\n")] = 0;
+			        
+			        // add age for passeger
+			        printf("Enter Passenger Age (e.x 36): ");
+			        fgets(szAge, sizeof(szAge),stdin);
+			        // check if age is correct, user mus add int 
+			        if (sscanf(szAge, "%d", &iAge) != 1){
+			            printf("Invalid input for age\n");
+			            continue;
+			        }
+			        
+			        // function // 
+			        AddPassenger(flights, szFlight_ID, iSeatNumber, szName, iAge);
+					printf("\r\nPress <enter> to continue...");
+				
+									
+			break;
+
+        ///////////////////////////////////////////////////////////////////////////
+        //  This case es to display data stored in the list, for that case is
+        //  important to be aware of the flight ID
+        ///////////////////////////////////////////////////////////////////////////
+			// 3
+			case MENU_RETRIEVE_FLIGHT_INFO:
+					
+				// Ad the right id 
+					printf("Enter the flight number (.e.x FN-17) to retrieve: ");
+					fgets(szFlight_ID, sizeof(szFlight_ID), stdin);
+				    szFlight_ID[strcspn(szFlight_ID, "\n")] = 0;
+					
+					// Call upoon the flight list that store the data added // 
+					Flight* flight = GetFlight(flights, szFlight_ID);
+					
+					// if data matches the id in the list, print the data 
+					// stored in the pPassenger 
+					
+					if (flight){
+					    printf("\nFlight Information:\n");
+					    ShowFlightData(flight);
+					    printf("\nPassenger List:\n");
+					    
+					    Passenger* pPassenger = flight->pPassengers;
+					    while(pPassenger ){
+					        printf("Seat Number: %d\n", pPassenger ->iSeatNumber);
+					        printf("Name: %s\n", pPassenger ->szName);
+					        printf("Age: %d\n\n", pPassenger ->iAge);
+					        pPassenger  = pPassenger ->pNext;
+					    
+					    }
+					    
+					    char cOption;
+					    printf("Would you like to modify the flight's departure time? (Y/N): ");
+					    scanf("%c", &cOption);
+					    getchar();
+					    
+					    if (cOption == 'Y' || cOption == 'y'){
+					        int iNewDepartureHour;
+					        int iNewDepartureMinute;
+					        char szDepartureTime[6];
+					        printf("\nEnter new departure time (HH:MM): ");
+					        fgets(szDepartureTime, sizeof(szDepartureTime), stdin);
+					        
+					        if (sscanf(szDepartureTime, "%d:%d", &iNewDepartureHour, &iNewDepartureMinute) != 2){
+					            printf("Invalid input for departure time\n");
+					            continue;
+					        }
+					        
+					        if(UpdateFLightDepartureTime(flights, szFlight_ID, iNewDepartureHour, iNewDepartureMinute) == 0){
+					            printf("Error: Could not update departure time.\n");
+					        
+					        }else {
+					            printf("Departure timed successfully updated.\n");
+					        }
+					        
+					        
+					    
+					    }
+					
+					
+					
+					// id ID is not found it wil return with no result 
+					} else{
+					    printf("Flight number (%s) not found\n", szFlight_ID);
+					
+					}
+					printf("\r\nPress <enter> to continue...");
+					getchar();
+					
+			break;
+			
+		/////////////////////////////////////////////////////////////////////////////////////////
+		//  Thos case is to display the current flight , but finding the flight stored in the 
+		//  list by gettting the departure time added in a value as 00:00, integers.
+		// this integer is sotred in the flight structure and pointed to in ShowFlightData
+		//////////////////////////////////////////////////////////////////////////////////////////
+			// 4
+			case MENU_FIND_FLIGHT_TIME:
+			    
+			    int iCountFlight = 0;
+			    Flight* pCurrent = flights;
+			    
+			    printf("\nList of all flights:\n");
+			    while(pCurrent != NULL){
+			        printf("\nFlight ID: %s\n", pCurrent->szFlight_ID);
+			        printf("Departure Time: %02d:%02d\n", pCurrent->iDepartureHour, pCurrent->iDepartureMinute);
+			        
+			        if(pCurrent->iIsDelayed == 1){
+                        printf("This flight is delayed.\n");
+                        iCountFlight++;			        
+			        }
+			        
+			        pCurrent = pCurrent->pNext;
+			    
+			    }
+			    printf("\nTotal number of delayed flights: %d\n", iCountFlight);
+			   
+			    printf("\r\nPress <enter> to continue...");
+			    getchar();
+			    
+			break;
+			
+		///////////////////////////////////////////////////////////////////////////////////
+		//  Deleting a flight from the list, the program promts the user to add flight id   	
+		// the the id gets stored in the pPassenger pointer , in the flight list
+		//   if flight is found, the user gets promted if they want to delelete the flight
+		//  if yes , the flights gets revoed from the list, if not , return if the flight
+		//	id is not found, return with a fail message 
+		////////////////////////////////////////////////////////////////////////////////////
+			// 5
+			case MENU_DELETE_FLIGHT:
+			    
+			    // promt to add a flight ID  //    
+			        printf("Enter the flight number (e.x.FN-17) to delete: ");
+			        fgets(szFlight_ID, sizeof(szFlight_ID), stdin);
+			        szFlight_ID[strcspn(szFlight_ID, "\n")] = 0;
+			        
+			      // input gets stored in pointer
+			      // the pointer iterates in the flight 
+			      // the flight gets printed, to confirm if the user wants to print 
+			        if(flight){
+			            printf("\nFlight Information:\n");
+			            ShowFlightData(flight);
+			            printf("\nPassenger List:\n");
+			            
+			            Passenger* pPassenger = flight->pPassengers;
+			            while(pPassenger){
+			                printf("Seat Number: %d\n", pPassenger->iSeatNumber);
+			                printf("Name: %s\n", pPassenger->szName);
+			                printf("Age: %d\n\n", pPassenger->iAge);
+			                pPassenger = pPassenger->pNext;
+			            
+			            }
+			         
+			        //  Prompt he user if want to delete the program, if yes, removed
+			        //  by calling the DeleteFlight function.
+			        
+			            printf("Do you want to delete this flight? (yes/no): ");
+			            fgets(szDeleteConfirmation, sizeof(szDeleteConfirmation), stdin);
+			            szDeleteConfirmation[strcspn(szDeleteConfirmation, "\n")] = 0;
+			        
+			            if(strcmp(szDeleteConfirmation, "yes") == 0){
+			                DeleteFlight(&flights, szFlight_ID); //<- removing the id of flight. 
+			                printf("Flight Deleted!");
+			        }
+			        
+			        }else{
+			            printf("Flight number %s not found\n", szFlight_ID);
+			        
+			        }
+			        printf("\r\nPress <enter> to continue...");
+			break;
+		
+		//////////////////////////////////////////////////////////////////////////////////
+		//  This case call use the DeletePassenger function and deleting the reservation
+		//  where the user gets 
+		//  prompted to enter a passenger name, it will iterate on the passenger lists
+		//  if passenger is found, it can be removed by adding the ID of the flight 
+		//  if the same passenger is different flights, the user can be promptet 
+		//  to add the flight id , and the only delete that flight.
+		/////////////////////////////////////////////////////////////////////////////////
+		    // 6
+			case MENU_DELETE_PASSENGER_DATA:
+			        
+			        
+			        // adding the passenger name , the name is stored
+			        // in a pointer, the pointer will iterate through the
+			        // flights, and passenger lists 
+			        int iCount = 0; 
+			        printf("Enter the passenger name: ");
+			        fgets(szName, sizeof(szName), stdin);
+			        szName[strcspn(szName, "\n")] = 0;
+			        
+			        Flight *pCurrentFlight = flights;
+			        while (pCurrentFlight != NULL){
+			            Passenger *pCurrentPassenger = pCurrentFlight->pPassengers;
+			            while(pCurrentPassenger != NULL){
+			                
+			                // if the name is stored it will print all the data related to the name 
+			                if(strcmp(pCurrentPassenger->szName,szName) == 0){
+			                    printf("\nFlight ID: %s\n", pCurrentFlight->szFlight_ID);
+			                    printf("Seat Numbers: %d\n", pCurrentPassenger->iSeatNumber);
+			                    printf("Destination: %s\n", pCurrentFlight->szDestination);
+			                    iCount++;
+			                
+			                }
+			                
+			                pCurrentPassenger = pCurrentPassenger->pNext;
+			            }
+			            
+			            pCurrentFlight = pCurrentFlight->pNext;
+			        
+			        }
+			        // if not , it will break from the loop, and return with a warning
+			        if (iCount == 0){
+			            printf("No flights found fo passenger %s\n", szName);
+			            break;
+			        }
+			        
+			        // THe user gets then promted to add flight ID, then the
+			        // function gets called 
+			        printf("\nEnter the flight ID of the reservation to delete: ");
+			        fgets(szSelectedFlight_ID, sizeof(szSelectedFlight_ID), stdin);
+			        szSelectedFlight_ID[strcspn(szSelectedFlight_ID, "\n")] =0;
+			        
+			        DeletePassenger(&flights, szName, szSelectedFlight_ID); //<- Deleting reservation 
+			        
+			        printf("\r\nPress <enter> to continue...");
+			break;
+			
+		
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		//  This case is to change a seat in a current reservation on a flight. 
+		//  First the user needs to add the flightID, The passenger name and the seat number. 
+		//  if a flight has a max capacity for 50 seats, and the user selects over 51, its not
+		//  possible, this must be represneted as a boolean value, because is eather true or false
+		//  This section has also a ClearBuff fucntion if a certain value gets stored in the buffer
+		// if the value is less that the max capacity the seat gets changed.
+		/////////////////////////////////////////////////////////////////////////////////////////////// 
+			// 7
+			case MENU_CHANGE_SEAT:
+			
+		        // add flight ID
+			        printf("Enter flight ID: ");
+			        fgets (szFlight_ID, sizeof(szFlight_ID), stdin);
+			        szFlight_ID[strcspn(szFlight_ID, "\n")] = 0;
+			        
+			    // add passenger name 
+			        
+			        printf("Enter passenger name: ");
+			        fgets(szName, sizeof(szName), stdin);
+			        szName[strcspn(szName, "\n")] = 0;
+			    
+			    // add seat number as int     
+			        printf("Enter the new seat number: ");
+			        scanf("%d", &iNewSeat);
+			      
+			   // clear buffer     
+			        ClearBuff();
+			        bool isSeatChanged = ChangeSeat(&flights, szFlight_ID, szName, iNewSeat);
+			        
+			    // confirmation 
+			        if (isSeatChanged){
+			            printf("Seat for passenger %s changed ...\n", szName, szFlight_ID, iNewSeat);
+			        }
+			        printf("\r\nPress <enter> to continue...");
+			break;
+			
+		/////////////////////////////////////////////////////////////////////////////////
+		//  This case is for the user to search for a name stored in the flights 
+		//	the user must add a name , if the name is stored, it will print to console
+		// the flight data with the name, seat, current flight id and departure time,
+		// destination. if not the program will display that the name is not in the list
+		////////////////////////////////////////////////////////////////////////////////////
+			// 8
+			case MENU_SEARCH_AVAILABLE_SEATS:
+			        
+			        printf("Available FLight IDs: \n");
+			        Flight* currentFLight = flights;
+			        
+			        while(currentFLight != NULL){
+			            printf("%s\n", currentFLight->szFlight_ID);
+			            currentFLight = currentFLight->pNext;			        
+			        }
+			        
+			        printf("Enter Flight ID");
+			        fgets(szFlight_ID,sizeof(szFlight_ID), stdin);
+			        szFlight_ID[strcspn(szFlight_ID, "\n")] = 0;
+			        
+			        flight = GetFlight(flights, szFlight_ID); 
+			        
+			        if(flight != NULL){
+			            
+			            int iTotalSeats = flight->iSeats;
+			            int iBookedSeats = 0;
+			            
+			            
+			            
+			            Passenger* pPassenger = flight->pPassengers;
+			            
+			            while(pPassenger != NULL){
+			                iBookedSeats++;
+			                pPassenger = pPassenger->pNext;
+			            
+			            }
+			            
+			            int iAvailableSeats = iTotalSeats - iBookedSeats;
+			            float fSeatCoverage = (float)iBookedSeats / iTotalSeats * 100; 
+			            
+			            
+			            printf("Flight ID: %s\n", flight->szFlight_ID);
+			            printf("Available Seats: %d\n", iAvailableSeats);
+			            printf("Booked Seats: %d\n", iBookedSeats);
+			            printf("Seat Coverage: %.2f%%\n", fSeatCoverage);
+			            
+			        
+			        }else{
+			        
+			            printf("Flight not found");
+			        }
+			        
+			        printf("\r\nPress <enter> to continue...");
+			        getchar();
+			
+			
+			
+			break;
+			
+			
+			case MENU_PROMPT_DESTINATIONS:
+			
+			        printf("Enter Destination: ");
+			        fgets(szDestination, sizeof(szDestination), stdin);
+			        szDestination[strcspn(szDestination, "\n")] = 0;
+			        
+			        
+			        int iCountPlaces = CountFLights(flights, szDestination);
+			        
+			        
+			        
+			        printf("There are %d flights going to %s\n", iCountPlaces, szDestination);
+			        
+			        
+			        printf("\r\nPress <enter> to continue...");
+			        getchar();
+			        
+			break;
+			
+			
+			case MENU_SEARCH_PASSENGER_BYNAME:
+			        
+			        //  Prompt the user for name 
+			        printf("Enter passenger name: ");
+			        fgets(szName, sizeof(szName), stdin);
+			        szName[strcspn(szName, "\n")] = '\0';
+			        SearchPassenger(flights, szName);   //<- calling on the function 
+			        
+			        printf("\r\nPress <enter> to continue...");
+			break;
+			
+			
+			
+			
+		default:
+			break;
+
+
+			} 
+			printf("Press <enter> to exit...");
+			getchar(); // pausing untill user press enter
+    
+    /////////////////////////////////////////////////////////////////////////////////
+    //  This is the end part of the program, that manage the flights and passengers
+    //  if eMenuSelect is    has the exitcodeee the user wil leave the program ,
+    //  After the loop, the program frees the memory allocated for the flights 
+    //  and their passengers using nested while loops. The outer while 
+    //  loop iterates through the list of flights, and for each flight, the inner 
+    //  while loop iterates through the list of passengers and frees their memory 
+    //  one by one.
+    //  The program exits with a return value of 0
+    /////////////////////////////////////////////////////////////////////////////////
+		
+		
+		}while (eMenuSelect != MENU_EXITCODE);
+		
+		Flight* pCurrent = flights;
+	    while (pCurrent != NULL){
+	       //iterate through the lists
+	        Flight* pNextFlight = pCurrent->pNext;
+	        Passenger* pCurrentPassenger = pCurrent->pPassengers;
+	       
+	       //  Iterates through passneger lists  
+	        while (pCurrentPassenger != NULL){
+	            Passenger* pNextPassenger = pCurrentPassenger->pNext;
+	            
+	            free(pCurrentPassenger); //-> Passsenger gets freed from memory 
+	            pCurrentPassenger = pNextPassenger;
+	        
+	        }
+	        
+	        free(pCurrent); //-> current flight gets freed from memeory 
+	        pCurrent = pNextFlight;
+	    
+	    }
+		    
+			printf("Exiting Program ....");
+			return 0;		
+		}
+	
+////////////////////////////////////////////////////////////////////////////////////
+//  The function first initializes a character buffer called <szBuffer> with 
+//  the value zero and sets the size of the buffer to 8. The fgets() function 
+//  then reads the user input from the command line, storing the input in 
+//  <szBuffer>, and the <atoi()> function converts the input to an integer, 
+//  which is stored in <iSelection>. the function compares the integer value 
+//  stored in iSelection to a series of constants defined earlier in the program, 
+//  which represent the menu options available to the user
+//
+////////////////////////////////////////////////////////////////////////////////////	
+	
+enum MENUSELECT __getch(){
+
+	char szBuffer[8] = {0}; // size of the menu buffer
+	int iSelection = 0;
+	fgets(szBuffer, 8 - 1, stdin);
+	ClearBuff();
+	iSelection = atoi(szBuffer);
+
+    // 1
+	if (iSelection == MENU_ADD_FLIGHT){
+		return MENU_ADD_FLIGHT;
+	
+	}
+	
+	// 2
+	if (iSelection == MENU_ADD_PASSENGER){
+		return MENU_ADD_PASSENGER;
+	}
+		
+    //3
+	if (iSelection == MENU_RETRIEVE_FLIGHT_INFO){
+		return MENU_RETRIEVE_FLIGHT_INFO;
+	}
+	
+	//4
+	if (iSelection == MENU_FIND_FLIGHT_TIME ){
+	    return MENU_FIND_FLIGHT_TIME;
+	}    
+	
+	//5
+	if (iSelection == MENU_DELETE_FLIGHT){
+	    return MENU_DELETE_FLIGHT;
+	}
+	
+	// 6
+	if (iSelection == MENU_DELETE_PASSENGER_DATA){
+	    return MENU_DELETE_PASSENGER_DATA;
+	}
+	
+	// 7
+	if (iSelection == MENU_CHANGE_SEAT){
+	    return MENU_CHANGE_SEAT;
+	}
+	
+	// 8 
+	if (iSelection == MENU_SEARCH_AVAILABLE_SEATS){
+	    return MENU_SEARCH_AVAILABLE_SEATS;
+	}
+	
+	//9
+	if (iSelection == MENU_PROMPT_DESTINATIONS){
+	    return MENU_PROMPT_DESTINATIONS;
+	}
+	
+	// 10
+	if (iSelection == MENU_SEARCH_PASSENGER_BYNAME){
+	    return MENU_SEARCH_PASSENGER_BYNAME;
+	}
+	
+	// 11
+	if (iSelection == MENU_EXITCODE){
+	    
+		return MENU_EXITCODE;		
+	}
+	
+    printf("Character %i entered...Enter valid option.\n", iSelection);
+    
+	
+	return UNINITIALIZED;
+
+
+    }
+    
+
+// ===================== end of file ======================//

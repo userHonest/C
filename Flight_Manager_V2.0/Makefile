@@ -1,0 +1,18 @@
+INCLDIR = ./include
+CC = gcc
+CFLAGS = -O2
+CFLAGS += -I$(INCLDIR) 
+OBJDIR = obj
+_DEPS =   selection.h## add headers here 
+DEPS = $(patsubst %,$(INCLDIR)/%,$(_DEPS))
+_OBJS = main.o selection.o  ## add obj here, main.o is the same as main.c
+OBJS = $(patsubst %,$(OBJDIR)/%,$(_OBJS))
+$(OBJDIR)/%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+## program name here 	
+Task03: $(OBJS) 
+	$(CC) -o $@ $^ $(CFLAGS)  
+.PHONY: clean
+clean:
+	rm -f $(OBJDIR)/*.o *~ core $(INCLDIR)/*~
+

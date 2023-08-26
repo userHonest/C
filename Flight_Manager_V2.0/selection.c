@@ -1,0 +1,546 @@
+//============================================== // 
+//  Retake_Exam PGR3401 C-Programming for Linux
+//  Teacher: Bengt Østby
+//  Menu Structure using enum is used as a 
+//  reference from last years exam solution.
+//  -----
+//  Task 3
+//  Version 1.1
+//  Sourcefile: selection.c
+//  Author: Kandidate_nr: 2019
+//  Patch_Date: 05/08/2023
+//===============================================//
+// ======= c Libraries=======
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdbool.h>
+// Headers // 
+#include "selection.h"
+
+//////////////////////////////////////////////////////////////////////
+// This code defines how the menu is going to be printed on screen
+//  The first part calls for system commands, with a condition that
+// checks for os commands. When the screen is cleared ,the function 
+// is going to display the menu.
+////////////////////////////////////////////////////////////////////////
+void PrintScreen(void){
+#ifdef _WIN32
+   system("cls");
+#else
+   system("clear");
+#endif
+
+	printf("\r\n Intergalactic Flight Manager V.1.1\r\n");
+	printf("\r\nPress 1 To Add A Flight ");
+	printf("\r\nPress 2 To Add Passenger");
+	printf("\r\nPress 3 Set New Departure Time on a Flight");
+	printf("\r\nPress 4 Display All Flights and Delays");
+	printf("\r\nPress 5 Delete a Flight and Reservations From System");
+	printf("\r\nPress 6 Delete a Passengers Reservation");
+	printf("\r\nPress 7 To Change a Passengers Seat");
+	printf("\r\nPress 8 To Display Available Seats on a Flight");
+	printf("\r\nPress 9 To Display Available Destinations for a flight");
+	printf("\r\nPress 10 To Search A Passengers Name on the System");
+	printf("\r\nPress 11 To Exit Intergalactic Flight Manager");
+	printf("\r\n\r\nChoose Option: ");
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//  This code adds a new flight to the linked list of flights. It allocates dinamycally
+//  for a new flight with pNewFLight, using malloc. The func checks if another flight 
+//  is already scheduled in the same departure time by iterating over the linked list 
+// of flights and comparing flights time, if there are no flights at the given time
+// the flight data gets stored in values like FlightID, destination, number of seats
+// and departure hour. It then updates the pointers of the head of the linked list and 
+// the previous flight .
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AddFlight(Flight** ppFlights, const char* szFlight_ID, const char* szDestination, int iSeats, int iDepartureHour, int iDepartureMinute){
+    
+    // a slot of memory os allocated to store data for a new flight
+    
+    Flight* pNewFLight = (Flight*)malloc(sizeof(Flight));
+    Flight* pCurrent = *ppFlights;
+    
+    
+    if (pNewFLight == NULL){
+        printf("Error");
+        return;
+    }
+    
+    // check if another fligth might be scheduled in at the same time // 
+    
+    while (pCurrent != NULL){
+        
+        if(pCurrent->iDepartureHour == iDepartureHour && pCurrent->iDepartureMinute == iDepartureMinute){
+            printf("Error: Another flight is already scheduled at the same departure time.\n");
+            
+            free(pNewFLight); // if flight is scheduled it will not get stored
+            return;           // then is no need to keep in memory   
+        }
+        pCurrent = pCurrent->pNext;
+    }
+    /* 
+        This block sets up various properties of a new flight strcuture. String copy function
+        copies the flight id and destinations strings. The pPrev and pNext links the new
+        data added , to the linkedlist  the head of this is *ppFlights
+        If there are no flights in the fields ,some are the sett to NULL. 
+    */ 
+    strncpy(pNewFLight->szFlight_ID, szFlight_ID, sizeof(pNewFLight->szFlight_ID) - 1);
+    strncpy(pNewFLight-> szDestination, szDestination, sizeof(pNewFLight->szDestination) - 1);
+    
+    pNewFLight->iSeats = iSeats;
+    pNewFLight->iDepartureHour  = iDepartureHour;
+    pNewFLight->iDepartureMinute = iDepartureMinute;
+    pNewFLight->pPassengers = NULL;
+    pNewFLight->pPrev = NULL;
+    pNewFLight->pNext = *ppFlights;
+    pNewFLight->iIsDelayed = 0;
+    
+    
+    if (*ppFlights !=NULL){
+        (*ppFlights)->pPrev = pNewFLight;
+    }
+    
+    *ppFlights = pNewFLight;
+    
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////77
+//  This function is to display the data of the flight , when its added to the 
+//  list,  and its called in main , this makes the program abit more user friendly, 
+//  in a distant future,this function could expand to promt the user to save data to bin encrypted bin file 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void ShowFlightData(const Flight* flight){
+    printf("\n");
+    printf("FLight ID: %s\n", flight->szFlight_ID);
+    printf("Destination: %s\n", flight->szDestination);
+    printf("Number of seats per plane: %d\n", flight-> iSeats);
+    printf("Departure time data (Hour: %d, Minute: %d)\n", flight->iDepartureHour, flight->iDepartureMinute);
+    printf("Departure time: %02d:%02d\n", flight->iDepartureHour, flight->iDepartureMinute);
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//  This function first iterates over the linked list of flights to find the 
+//  flight with the specified flight ID given in the previous function.
+//  It has a check, if flight is not found it returns,it also checks if
+//  the seat number is valid, if not it returns.
+//  If all the checks are passed, then the function allocates memory for
+//  the passenger data. The function sets properties of passenger , like name,
+//  seat, ahe and flight. Then it add a new passener to the list of the specified flight
+//  iterates over the linked list of passengers until it finds the correct position for 
+//  the new passenger example: the first passenger with a higher seat number than the new passenger.  
+//  The function then inserts the new passenger into the list by updating the next pointer of the 
+//  previous passenger to point to the new passenger and the next pointer of the new passenger to 
+//  point to the next passenger in the list.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void AddPassenger(Flight* ppFlights, const char* szFlight_ID, int iSeatNumber, const char* szName, int iAge){
+    // creating a flight on the list 
+    Flight* pThisFLight = ppFlights;
+    
+    while (pThisFLight != NULL){
+        if(strcmp(pThisFLight->szFlight_ID, szFlight_ID) == 0){
+            // check if the seat number is greater that he one stored
+            // if so , return with a message
+            if(iSeatNumber > pThisFLight->iSeats || iSeatNumber < 1){
+                printf("Ths plane has only %d seats. \n",pThisFLight->iSeats);
+                return;
+            }
+            // allocating passenger data in memory
+            Passenger* pNewPassng = (Passenger*)malloc(sizeof(Passenger));
+            if (pNewPassng == NULL){
+                printf("Error: ");
+                return;
+            
+            }
+            
+            /* The seat number, name, and age of the new 
+                passenger are assigned to the iSeatNumber, 
+                szName, and iAge fields of the new Passenger struct.*/
+            
+            pNewPassng->iSeatNumber = iSeatNumber;
+            strncpy(pNewPassng->szName, szName, sizeof(pNewPassng->szName) - 1);
+            pNewPassng->iAge = iAge;
+            pNewPassng->pNext = NULL;
+            
+            // of the list is empty,then a passenger is added 
+            // by seat order
+            if(pThisFLight->pPassengers == NULL){
+                pThisFLight->pPassengers = pNewPassng;
+            
+            }
+            else {
+                Passenger* pOnPassenger = pThisFLight->pPassengers;
+                Passenger* pPrePassng = NULL;
+                /* 
+                    Once the correct position for the new passenger is found, 
+                    the new passenger is inserted into the list by updating 
+                    the pNext field of the previous passenger to point to the 
+                    new passenger and the pNext field of the new passenger to 
+                    point to the next passenger in the list.
+                */ 
+                while (pOnPassenger != NULL && pOnPassenger->iSeatNumber < iSeatNumber){
+                    pPrePassng = pOnPassenger;
+                    pOnPassenger = pOnPassenger->pNext;
+                    
+                }
+                
+                if (pPrePassng == NULL){
+                    pNewPassng->pNext = pThisFLight->pPassengers;
+                    pThisFLight->pPassengers = pNewPassng; 
+                }
+                else{
+                    pNewPassng->pNext = pOnPassenger;
+                    pPrePassng->pNext = pNewPassng;
+                }
+            }
+            printf("Passenger added to flight %s\n", szFlight_ID);
+            return;
+        }
+        pThisFLight = pThisFLight->pNext;
+    }
+    
+    printf("Error: FLight with ID %s not found\n", szFlight_ID);
+}
+
+////////////////////////////////////////////////////////////////////
+//  This function searches the linked list of Flight struct, 
+//  specified with and ID,. The function takes a pointer to the head 
+// of the list of flights and the string containtng the FLightID:
+////////////////////////////////////////////////////////////////////////
+
+Flight* GetFlight(Flight* flights, const char* szFlight_ID){
+    // init pointr variable
+    Flight* pCurrent = flights;
+    
+    // loop that iterates over each Flight in the list 
+    // beginning with the first and poiting to pCurrent.
+    
+    while (pCurrent != NULL){
+        if(strcmp(pCurrent->szFlight_ID, szFlight_ID) == 0){
+            return pCurrent;
+        }
+        
+        // if it not matches it goes to the next in the list.
+        pCurrent = pCurrent->pNext;
+    }
+    
+    
+    return NULL;
+
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Function to be used for updating the departure time , it takes the given hour added in add flight 
+//  modifies the new time. Th iIsdelayed will then store the modified time and print the given id 
+// with delayed time. and mark the flight as delayed. 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int UpdateFLightDepartureTime(Flight* flights, const char* szFlight_ID, int iNewDepartureHour, int iNewDepartureMinute){
+    
+    if (iNewDepartureHour < 0 || iNewDepartureHour > 23 || iNewDepartureMinute < 0 || iNewDepartureMinute > 59){
+        printf("Invalid departure time.\n");
+        return 0;
+    
+    }
+    
+    Flight* flight = GetFlight(flights, szFlight_ID);
+    
+    if(flight != NULL){
+    
+        Flight* pCurrent = flights;
+        
+        while(pCurrent != NULL){
+            if (pCurrent != flight && pCurrent->iDepartureHour == iNewDepartureHour && pCurrent->iDepartureMinute == iNewDepartureMinute){
+                printf("Error: Another flight is already scheduled at the same departure time.\n ");
+                return 0;
+            }
+            pCurrent = pCurrent->pNext;
+        
+        }
+        flight->iDepartureHour = iNewDepartureHour;
+        flight->iDepartureMinute = iNewDepartureMinute;
+        flight->iIsDelayed = 1; // <- variables stored in the strcutre to add and keep track fo delayed flights.
+        return 1;
+        
+    }else {
+        printf("Flight not found");
+        return 0;
+    }
+
+}
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////
+//  This function gets the flight time, it searches the list from FLights structure
+// The fucn takes two arguments poting to the head of ht elist, flights and two
+// ints representing departurehour and minutes. The function enteres a loop over
+// Eeach flight and compares the flight with the iDepartureHour, iDepartureMinute,
+// in the struct with the specified time.if it match it return the pointer of that
+// struct that would be pCurrent.
+///////////////////////////////////////////////////////////////////////////////////////
+Flight* GetFlightTime(Flight* flights, int iDepartureHour, int iDepartureMinute){
+    
+    // init pointer variable to head of current list
+    Flight* pCurrent = flights;
+    
+    // entering the loop over each flight struct in the list
+    while(pCurrent != NULL){
+    
+        if(pCurrent->iDepartureHour == iDepartureHour && pCurrent->iDepartureMinute == iDepartureMinute){
+            return pCurrent;
+        }
+        // if they dont match it goes to the next in the list.
+        pCurrent = pCurrent->pNext;
+    
+    
+    }
+    return NULL;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//  This function removes a flight from the structure, with a special ID, 
+//  The function then enters a loop that iterates over each Flight struct 
+//  in the linked list, beginning with the first Flight pointed to by <pCurrent>. 
+//  For each Flight struct, the function compares the <szFlight_ID> field of the 
+//  Flight struct to the specified ID. If the <szFlight_ID> field of the Flight 
+//  struct matches the specified ID, the function removes the Flight struct from 
+//  the linked list and frees its memory
+///////////////////////////////////////////////////////////////////////////////
+
+void DeleteFlight(Flight** ppFlights, const char* szFlight_ID){
+    
+    
+    Flight* pCurrent = *ppFlights;
+    Flight* pPrevious = NULL;
+    
+    while(pCurrent != NULL){
+        if(strcmp(pCurrent->szFlight_ID, szFlight_ID)==0){
+            
+            // check if flight is in structure
+            // the if not it goes to next in the list
+            // until it matches the ID given 
+            if(pPrevious == NULL){
+            *ppFlights = pCurrent->pNext;
+            } else {
+                pPrevious->pNext = pCurrent->pNext;
+            }
+            
+            free(pCurrent); // freeing memory and returning 
+            printf("Flight with ID %s has been deleted.\n", szFlight_ID);
+            return;
+        }
+        
+        pPrevious = pCurrent;
+        pCurrent = pCurrent->pNext;
+    }
+    
+    printf("Error: Flight with ID %s not found", szFlight_ID);
+    
+}
+
+//////////////////////////////////////////////////////////////////////////////////
+//  The funcion initializes a pointer to a Flight struct, <pCurrentFlight>, with the 
+//  value of the pointer to the pointer of the Flight struct passed in as an argument. 
+//  It then enters a while loop which will iterate over all the flights until 
+//  it finds the one matching the given flight ID.
+//  
+//  If it finds a match, it checks if the passenger is the first one in the list. 
+//  If it is, it sets the <pCurrentFlight->pPassengers> pointer to the next passenger 
+//  in the list. If it's not, it sets the <pPrevoiusPassenger->pNext> pointer to the 
+//  next passenger in the list, effectively removing the current passenger from the list
+//  It then frees the memory allocated to the current passenger, prints a message 
+//  confirming that the passenger's reservation has been deleted, and returns. 
+////////////////////////////////////////////////////////////////////////////////////////7
+
+void DeletePassenger(Flight **flights, char *szName, char *szFlight_ID){
+    
+    // init pointer to flight strucuture
+    Flight *pCurrentFlight = *flights;
+    
+    // the pointer enters the loop finding existing flight
+    // 
+    while(pCurrentFlight != NULL){
+        if(strcmp(pCurrentFlight->szFlight_ID, szFlight_ID) == 0){
+            // if its right it init the poiner to the first passenger struct 
+            
+            Passenger *pCurrentPassenger = pCurrentFlight->pPassengers;
+            Passenger *pPrevoiusPassenger = NULL;
+            
+            // the pointer iterate through the structure
+            // with passengers until it finds a match 
+            while (pCurrentPassenger != NULL){
+                
+                if(strcmp(pCurrentPassenger->szName, szName) == 0){
+                    if(pPrevoiusPassenger != NULL){
+                        pPrevoiusPassenger->pNext = pCurrentPassenger->pNext;
+                
+                    }else{
+                        pCurrentFlight->pPassengers = pCurrentPassenger->pNext;
+                }
+                
+                    free(pCurrentPassenger); // allocated memory is freed 
+                    printf("Passenger reservation has been deleted.\n");
+                    return;
+            
+            }
+                pPrevoiusPassenger = pCurrentPassenger;
+                pCurrentPassenger = pCurrentPassenger->pNext;
+            
+        }
+        printf("Passenger not found.\n");
+        return;
+        }
+        pCurrentFlight = pCurrentFlight->pNext;
+    }
+
+    printf("Flight not found.\n");
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////7
+//  This function is to change seat , it takes a pointerto a pointer from structure
+//  flight to flights, The function returns a boolean value to indicate whether the
+//  seat change was successfull or not, it returns with 1 iff successfull and with 0
+//  not.
+//  The function first searches for the flight whose <szFlight_ID> matches the 
+//  provided one. If found, it checks whether the requested seat number <iNewSeat> 
+//  is within the range of available seats. If <iNewSeat> is in range hte function
+//  checks wheter the seat is already takem or not.If it is already taken, the 
+//  function prints a message and returns 0. Otherwise, it searches for the 
+//  passenger with szName and updates their seat number to <iNewSeat>
+// ////////////////////////////////////////////////////////////////////////////////////////7
+bool ChangeSeat(Flight **flights, char *szFlight_ID, char *szName, int iNewSeat){
+    Flight *pCurrentFlight = *flights;
+    
+    // Searching for the flight wiht given ID
+    while(pCurrentFlight != NULL){
+        if(strcmp(pCurrentFlight->szFlight_ID, szFlight_ID) == 0){
+            // Check if the requested seat number is within range given
+            // when added a flight,example: if flight with ID has 50 seats
+            // user cannot change to seat 51 because it dont exist.
+            if(iNewSeat > pCurrentFlight->iSeats || iNewSeat < 1){
+                printf("No, this flight has %d seats.\n", pCurrentFlight->iSeats);
+                return 0;
+            }
+
+            Passenger *pCurrentPassenger = pCurrentFlight->pPassengers;
+            // check to see if the seat is taken
+            // if another passenger has the seat 
+            while(pCurrentPassenger != NULL){
+                if(pCurrentPassenger->iSeatNumber == iNewSeat){
+                    printf("The seat is already taken.\n");
+                    return 0;
+                }
+                
+                pCurrentPassenger = pCurrentPassenger->pNext;
+            }
+            
+            pCurrentPassenger = pCurrentFlight->pPassengers;
+            
+            // iterates thorugh the list structure and adds the seat to the list. 
+            while (pCurrentPassenger != NULL){
+                if(strcmp(pCurrentPassenger->szName, szName) == 0){
+                    pCurrentPassenger->iSeatNumber = iNewSeat;
+                    printf("Seat changed successfully.\n");
+                    return 1;
+                }
+                
+                pCurrentPassenger = pCurrentPassenger->pNext;
+            }
+            
+            printf("Passenger not found.\n");
+            return 0;
+        }
+        
+        pCurrentFlight = pCurrentFlight->pNext;
+    }
+    
+    printf("Flight not found.\n");
+    return 0;
+
+}
+
+////////////////////////////////////////////////////////////////////////////
+//  This function thaes a pointer to the first node of he list flight,
+//  and a string representing the name of a passenger to search for.
+//  The function searches for the passenfer in all flights and prints out 
+//  the flight ID of all the flights that passengers name is on.
+//  <pCurrentFlight> is the first node, the it enteres in total two loops
+// one that contninues as long as there are flights on the list, and
+// another as long as there are passengers on the list.
+// if passenger is not found in any of the flights it print out a message.
+//////////////////////////////////////////////////////////////////////////////
+void SearchPassenger(Flight *flights, const char *szName){
+    // init the pointer in flights
+    Flight *pCurrentFlight = flights;
+    int iFoundPassenger = 0;
+    
+    printf("Searching for passenger: %s\n", szName);
+        // looping through the list to see if there are passengers in that flight .
+    while(pCurrentFlight != NULL){
+        Passenger *pCurrentPassenger = pCurrentFlight->pPassengers;
+        
+        // looping through the list to see if there are passengers with that name .
+        while(pCurrentPassenger != NULL){
+        
+            if(strcmp(pCurrentPassenger->szName, szName) == 0){
+                printf("Found passenger in flight %s\n", pCurrentFlight->szFlight_ID);
+                iFoundPassenger = 1;
+            
+            }
+            // once all passengers are checked, there is a condition 
+            // at the end to veryfy if passenger is in flight or not.
+            pCurrentPassenger = pCurrentPassenger->pNext;
+        }
+        
+        pCurrentFlight = pCurrentFlight->pNext;
+    }
+    if (!iFoundPassenger){
+        printf("Passenger not found in any flights");
+    }
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////
+// Function that will help to print out the total of flights stored to the same
+// destination and will print out the ids of theese flights aswell.
+/////////////////////////////////////////////////////////////////////////////////
+int CountFLights(Flight* flights, const char* szDestination){
+    int iCountDestinations = 0;
+    
+    
+    while (flights != NULL){
+        if(strcmp(flights->szDestination, szDestination) == 0){
+            iCountDestinations++;
+            printf("Flight ID: %s\n", flights->szFlight_ID);
+        }
+        
+        flights = flights->pNext;
+    
+    }
+    
+    return iCountDestinations;
+
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////
+//   this funtion is to clear the input buffer that i encountered in the menu area
+//   this is the only form of debugger i have that uses getchar() function
+//  if there are some unwanted characters in the buffe rthis will clear them
+/////////////////////////////////////////////////////////////////////////////////////////
+void ClearBuff(){
+    int iC;
+    while ((iC = getchar()) != '\n' && iC != EOF);
+}
+
+// ==== end of file ====== // 
