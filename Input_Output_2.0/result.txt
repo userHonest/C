@@ -1,0 +1,70 @@
+Word 1: JUMP
+Lowercase: False
+Uppercase: True
+Heterogram: True
+Palindrome: False
+Size: 4
+
+Word 2: unique
+Lowercase: True
+Uppercase: False
+Heterogram: False
+Palindrome: False
+Size: 6
+
+Word 3: radar
+Lowercase: True
+Uppercase: False
+Heterogram: False
+Palindrome: True
+Size: 5
+
+Word 4: listen
+Lowercase: True
+Uppercase: False
+Heterogram: True
+Palindrome: False
+Size: 6
+
+Word 5: quiet
+Lowercase: True
+Uppercase: False
+Heterogram: True
+Palindrome: False
+Size: 5
+
+Word 6: cat
+Lowercase: True
+Uppercase: False
+Heterogram: True
+Palindrome: False
+Size: 3
+
+Word 7: SILENT
+Lowercase: False
+Uppercase: True
+Heterogram: True
+Palindrome: False
+Size: 6
+
+Word 8: dog
+Lowercase: True
+Uppercase: False
+Heterogram: True
+Palindrome: False
+Size: 3
+
+Word 9: deified
+Lowercase: True
+Uppercase: False
+Heterogram: False
+Palindrome: True
+Size: 7
+
+Word 10: END
+Lowercase: False
+Uppercase: True
+Heterogram: True
+Palindrome: False
+Size: 3
+
