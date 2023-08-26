@@ -1,0 +1,180 @@
+---------------------------------------------
+
+
+Index:0
+Number:  55
+Binary: 00110111
+Hexadecimal: 37
+
+Abundant:No
+Cube:No
+Deficient:Yes
+Fibonacci:Yes
+Square:No
+Odd:Yes
+Perfect:No
+Prime:No
+---------------------------------------------
+
+---------------------------------------------
+
+
+Index:1
+Number:  874981
+Binary: 11010101100111100101
+Hexadecimal: D59E5
+
+Abundant:No
+Cube:No
+Deficient:Yes
+Fibonacci:No
+Square:No
+Odd:Yes
+Perfect:No
+Prime:No
+---------------------------------------------
+
+---------------------------------------------
+
+
+Index:2
+Number:  553
+Binary: 1000101001
+Hexadecimal: 229
+
+Abundant:No
+Cube:No
+Deficient:Yes
+Fibonacci:No
+Square:No
+Odd:Yes
+Perfect:No
+Prime:No
+---------------------------------------------
+
+---------------------------------------------
+
+
+Index:3
+Number:  17
+Binary: 00010001
+Hexadecimal: 11
+
+Abundant:No
+Cube:No
+Deficient:Yes
+Fibonacci:No
+Square:No
+Odd:Yes
+Perfect:No
+Prime:Yes
+---------------------------------------------
+
+---------------------------------------------
+
+
+Index:4
+Number:  42
+Binary: 00101010
+Hexadecimal: 2A
+
+Abundant:Yes
+Cube:No
+Deficient:No
+Fibonacci:No
+Square:No
+Odd:No
+Perfect:No
+Prime:No
+---------------------------------------------
+
+---------------------------------------------
+
+
+Index:5
+Number:  894
+Binary: 1101111110
+Hexadecimal: 37E
+
+Abundant:Yes
+Cube:No
+Deficient:No
+Fibonacci:No
+Square:No
+Odd:No
+Perfect:No
+Prime:No
+---------------------------------------------
+
+---------------------------------------------
+
+
+Index:6
+Number:  98732
+Binary: 11000000110101100
+Hexadecimal: 181AC
+
+Abundant:No
+Cube:No
+Deficient:Yes
+Fibonacci:No
+Square:No
+Odd:No
+Perfect:No
+Prime:No
+---------------------------------------------
+
+---------------------------------------------
+
+
+Index:7
+Number:  555
+Binary: 1000101011
+Hexadecimal: 22B
+
+Abundant:No
+Cube:No
+Deficient:Yes
+Fibonacci:No
+Square:No
+Odd:Yes
+Perfect:No
+Prime:No
+---------------------------------------------
+
+---------------------------------------------
+
+
+Index:8
+Number:  99273
+Binary: 11000001111001001
+Hexadecimal: 183C9
+
+Abundant:No
+Cube:No
+Deficient:Yes
+Fibonacci:No
+Square:No
+Odd:Yes
+Perfect:No
+Prime:No
+---------------------------------------------
+
+---------------------------------------------
+
+
+Index:9
+Number:  110283
+Binary: 11010111011001011
+Hexadecimal: 1AECB
+
+Abundant:No
+Cube:No
+Deficient:Yes
+Fibonacci:No
+Square:No
+Odd:Yes
+Perfect:No
+Prime:No
+---------------------------------------------
+
